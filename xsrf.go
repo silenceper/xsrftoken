@@ -27,7 +27,6 @@ import (
 )
 
 // The duration that XSRF tokens are valid.
-// 1 day is the same as the C++ and Java implementations.
 // It is exported so clients may set cookie timeouts that match generated tokens.
 const Timeout = 24 * time.Hour
 
@@ -39,7 +38,7 @@ func clean(s string) string {
 // GenerateToken returns a URL-safe secure XSRF token that expires in 24 hours.
 //
 // key is a secret key for your application.
-// userID is a unique identifier for the user (e.g. Gaia ID).
+// userID is a unique identifier for the user.
 // actionID is the action the user is taking (e.g. POSTing to a particular path).
 func GenerateToken(key, userID, actionID string) string {
 	return generateTokenAtTime(key, userID, actionID, time.Now())
