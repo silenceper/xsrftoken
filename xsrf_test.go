@@ -32,22 +32,22 @@ var (
 )
 
 func TestValidToken(t *testing.T) {
-	tok := generateTokenAtTime(key, userID, actionID, now)
-	if !validTokenAtTime(tok, key, userID, actionID, oneMinuteFromNow) {
+	tok := generateAtTime(key, userID, actionID, now)
+	if !validAtTime(tok, key, userID, actionID, oneMinuteFromNow) {
 		t.Error("One second later: Expected token to be valid")
 	}
-	if !validTokenAtTime(tok, key, userID, actionID, now.Add(Timeout-1*time.Nanosecond)) {
+	if !validAtTime(tok, key, userID, actionID, now.Add(Timeout-1*time.Nanosecond)) {
 		t.Error("Just before timeout: Expected token to be valid")
 	}
-	if !validTokenAtTime(tok, key, userID, actionID, now.Add(-1*time.Minute)) {
+	if !validAtTime(tok, key, userID, actionID, now.Add(-1*time.Minute)) {
 		t.Error("One minute in the past: Expected token to be valid")
 	}
 }
 
 // TestSeparatorReplacement tests that separators are being correctly substituted
 func TestSeparatorReplacement(t *testing.T) {
-	tok := generateTokenAtTime("foo:bar", "baz", "wah", now)
-	tok2 := generateTokenAtTime("foo", "bar:baz", "wah", now)
+	tok := generateAtTime("foo:bar", "baz", "wah", now)
+	tok2 := generateAtTime("foo", "bar:baz", "wah", now)
 	if tok == tok2 {
 		t.Errorf("Expected generated tokens to be different")
 	}
@@ -65,9 +65,9 @@ func TestInvalidToken(t *testing.T) {
 		{"More than 1 minute from the future", key, userID, actionID, now.Add(-1*time.Nanosecond - 1*time.Minute)},
 	}
 
-	tok := generateTokenAtTime(key, userID, actionID, now)
+	tok := generateAtTime(key, userID, actionID, now)
 	for _, itt := range invalidTokenTests {
-		if validTokenAtTime(tok, itt.key, itt.userID, itt.actionID, itt.t) {
+		if validAtTime(tok, itt.key, itt.userID, itt.actionID, itt.t) {
 			t.Errorf("%v: Expected token to be invalid", itt.name)
 		}
 	}
@@ -85,7 +85,7 @@ func TestValidateBadData(t *testing.T) {
 	}
 
 	for _, bdt := range badDataTests {
-		if validTokenAtTime(bdt.tok, key, userID, actionID, oneMinuteFromNow) {
+		if validAtTime(bdt.tok, key, userID, actionID, oneMinuteFromNow) {
 			t.Errorf("%v: Expected token to be invalid", bdt.name)
 		}
 	}

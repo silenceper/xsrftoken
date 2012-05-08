@@ -35,30 +35,30 @@ func clean(s string) string {
 	return strings.Replace(s, ":", "_", -1)
 }
 
-// GenerateToken returns a URL-safe secure XSRF token that expires in 24 hours.
+// Generate returns a URL-safe secure XSRF token that expires in 24 hours.
 //
 // key is a secret key for your application.
 // userID is a unique identifier for the user.
 // actionID is the action the user is taking (e.g. POSTing to a particular path).
-func GenerateToken(key, userID, actionID string) string {
-	return generateTokenAtTime(key, userID, actionID, time.Now())
+func Generate(key, userID, actionID string) string {
+	return generateAtTime(key, userID, actionID, time.Now())
 }
 
-// generateTokenAtTime is like GenerateToken, but returns a token that expires 24 hours from now.
-func generateTokenAtTime(key, userID, actionID string, now time.Time) string {
+// generateAtTime is like Generate, but returns a token that expires 24 hours from now.
+func generateAtTime(key, userID, actionID string, now time.Time) string {
 	h := hmac.New(sha1.New, []byte(key))
 	fmt.Fprintf(h, "%s:%s:%d", clean(userID), clean(actionID), now.UnixNano())
 	tok := fmt.Sprintf("%s:%d", h.Sum(nil), now.UnixNano())
 	return base64.URLEncoding.EncodeToString([]byte(tok))
 }
 
-// ValidToken returns true if token is a valid, unexpired token returned by GenerateToken.
-func ValidToken(token, key, userID, actionID string) bool {
-	return validTokenAtTime(token, key, userID, actionID, time.Now())
+// Valid returns true if token is a valid, unexpired token returned by Generate.
+func Valid(token, key, userID, actionID string) bool {
+	return validAtTime(token, key, userID, actionID, time.Now())
 }
 
-// validTokenAtTime is like ValidToken, but it uses now to check if the token is expired.
-func validTokenAtTime(token, key, userID, actionID string, now time.Time) bool {
+// validAtTime is like Valid, but it uses now to check if the token is expired.
+func validAtTime(token, key, userID, actionID string, now time.Time) bool {
 	// Decode the token.
 	data, err := base64.URLEncoding.DecodeString(token)
 	if err != nil {
@@ -89,6 +89,6 @@ func validTokenAtTime(token, key, userID, actionID string, now time.Time) bool {
 	}
 
 	// Check that the token matches the expected value.
-	expected := generateTokenAtTime(key, userID, actionID, issueTime)
+	expected := generateAtTime(key, userID, actionID, issueTime)
 	return token == expected
 }
