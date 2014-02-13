@@ -1,11 +1,11 @@
 // Copyright 2012 Google Inc. All Rights Reserved.
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,22 +32,22 @@ var (
 )
 
 func TestValidToken(t *testing.T) {
-	tok := generateAtTime(key, userID, actionID, now)
-	if !validAtTime(tok, key, userID, actionID, oneMinuteFromNow) {
+	tok := generateTokenAtTime(key, userID, actionID, now)
+	if !validTokenAtTime(tok, key, userID, actionID, oneMinuteFromNow) {
 		t.Error("One second later: Expected token to be valid")
 	}
-	if !validAtTime(tok, key, userID, actionID, now.Add(Timeout-1*time.Nanosecond)) {
+	if !validTokenAtTime(tok, key, userID, actionID, now.Add(Timeout-1*time.Nanosecond)) {
 		t.Error("Just before timeout: Expected token to be valid")
 	}
-	if !validAtTime(tok, key, userID, actionID, now.Add(-1*time.Minute)) {
+	if !validTokenAtTime(tok, key, userID, actionID, now.Add(-1*time.Minute)) {
 		t.Error("One minute in the past: Expected token to be valid")
 	}
 }
 
 // TestSeparatorReplacement tests that separators are being correctly substituted
 func TestSeparatorReplacement(t *testing.T) {
-	tok := generateAtTime("foo:bar", "baz", "wah", now)
-	tok2 := generateAtTime("foo", "bar:baz", "wah", now)
+	tok := generateTokenAtTime("foo:bar", "baz", "wah", now)
+	tok2 := generateTokenAtTime("foo", "bar:baz", "wah", now)
 	if tok == tok2 {
 		t.Errorf("Expected generated tokens to be different")
 	}
@@ -65,9 +65,9 @@ func TestInvalidToken(t *testing.T) {
 		{"More than 1 minute from the future", key, userID, actionID, now.Add(-1*time.Nanosecond - 1*time.Minute)},
 	}
 
-	tok := generateAtTime(key, userID, actionID, now)
+	tok := generateTokenAtTime(key, userID, actionID, now)
 	for _, itt := range invalidTokenTests {
-		if validAtTime(tok, itt.key, itt.userID, itt.actionID, itt.t) {
+		if validTokenAtTime(tok, itt.key, itt.userID, itt.actionID, itt.t) {
 			t.Errorf("%v: Expected token to be invalid", itt.name)
 		}
 	}
@@ -85,7 +85,7 @@ func TestValidateBadData(t *testing.T) {
 	}
 
 	for _, bdt := range badDataTests {
-		if validAtTime(bdt.tok, key, userID, actionID, oneMinuteFromNow) {
+		if validTokenAtTime(bdt.tok, key, userID, actionID, oneMinuteFromNow) {
 			t.Errorf("%v: Expected token to be invalid", bdt.name)
 		}
 	}
